@@ -1,8 +1,10 @@
 import { expect, test } from '@playwright/test';
 
 test('Place Order: Login before Checkout', async ({ page }) => {
-  // Setup: Create account first
-  await page.goto('http://automationexercise.com');
+  await page.goto('https://automationexercise.com', {
+    waitUntil: 'domcontentloaded',
+    timeout: 60000
+  });
   await page.click('a[href="/login"]');
   
   const timestamp = Date.now();
@@ -32,62 +34,49 @@ test('Place Order: Login before Checkout', async ({ page }) => {
   await page.click('a[data-qa="continue-button"]');
   await page.click('a[href="/logout"]');
 
-  // Test starts here
-  // 1-3. Navigate and verify home page
-  await page.goto('http://automationexercise.com');
+  await page.goto('http://automationexercise.com', {
+    waitUntil: 'domcontentloaded',
+    timeout: 60000
+  });
   await expect(page).toHaveTitle(/Automation Exercise/);
 
-  // 4. Click 'Signup / Login' button
   await page.click('a[href="/login"]');
 
-  // 5. Fill email, password and click 'Login' button
   await page.fill('input[data-qa="login-email"]', testEmail);
   await page.fill('input[data-qa="login-password"]', testPassword);
   await page.click('button[data-qa="login-button"]');
 
-  // 6. Verify 'Logged in as username' at top
   await expect(page.locator(`text=${testName}`)).toBeVisible();
 
-  // 7. Add products to cart
   await page.click('a[href="/products"]');
   const product = page.locator('.single-products').first();
   await product.hover();
   await product.locator('a.add-to-cart').first().click();
   await page.click('button:has-text("Continue Shopping")');
 
-  // 8. Click 'Cart' button
   await page.click('a[href="/view_cart"]');
 
-  // 9. Verify that cart page is displayed
   await expect(page).toHaveURL(/.*view_cart/);
 
-  // 10. Click Proceed To Checkout
   await page.click('text=Proceed To Checkout');
 
-  // 11. Verify Address Details and Review Your Order
   await expect(page.locator('.checkout-information')).toBeVisible();
 
-  // 12. Enter description in comment text area and click 'Place Order'
   await page.fill('textarea[name="message"]', 'Handle with care');
   await page.click('a[href="/payment"]');
 
-  // 13. Enter payment details
   await page.fill('input[data-qa="name-on-card"]', 'Login Checkout Test');
   await page.fill('input[data-qa="card-number"]', '5555555555554444');
   await page.fill('input[data-qa="cvc"]', '789');
   await page.fill('input[data-qa="expiry-month"]', '09');
   await page.fill('input[data-qa="expiry-year"]', '2027');
 
-  // 14. Click 'Pay and Confirm Order' button
   await page.click('button[data-qa="pay-button"]');
 
-  // 15. Verify success message
   await expect(page.locator('text=Congratulations! Your order has been confirmed!')).toBeVisible();
 
-  // 16. Click 'Delete Account' button
   await page.click('a[href="/delete_account"]');
 
-  // 17. Verify 'ACCOUNT DELETED!' and click 'Continue' button
   await expect(page.locator('text=Account Deleted!')).toBeVisible();
   await page.click('a[data-qa="continue-button"]');
 });

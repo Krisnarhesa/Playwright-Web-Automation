@@ -1,15 +1,16 @@
 import { expect, test } from '@playwright/test';
 
 test('Register User with existing email', async ({ page }) => {
-  // Setup: Create an account first
-  await page.goto('http://automationexercise.com');
+  await page.goto('https://automationexercise.com', {
+    waitUntil: 'domcontentloaded',
+    timeout: 60000
+  });
   await page.click('a[href="/login"]');
   
   const timestamp = Date.now();
   const testName = 'Existing User';
   const testEmail = `existinguser${timestamp}@example.com`;
   
-  // Create first account
   await page.fill('input[data-qa="signup-name"]', testName);
   await page.fill('input[data-qa="signup-email"]', testEmail);
   await page.click('button[data-qa="signup-button"]');
@@ -32,30 +33,23 @@ test('Register User with existing email', async ({ page }) => {
   await page.click('a[data-qa="continue-button"]');
   await page.click('a[href="/logout"]');
 
-  // Test starts here
-  // 1. Launch browser & 2. Navigate to url
-  await page.goto('http://automationexercise.com');
+  await page.goto('http://automationexercise.com', {
+    waitUntil: 'domcontentloaded',
+    timeout: 60000
+  });
 
-  // 3. Verify that home page is visible successfully
   await expect(page).toHaveTitle(/Automation Exercise/);
 
-  // 4. Click on 'Signup / Login' button
   await page.click('a[href="/login"]');
 
-  // 5. Verify 'New User Signup!' is visible
   await expect(page.locator('text=New User Signup!')).toBeVisible();
 
-  // 6. Enter name and already registered email address
   await page.fill('input[data-qa="signup-name"]', 'Another Name');
   await page.fill('input[data-qa="signup-email"]', testEmail);
-
-  // 7. Click 'Signup' button
   await page.click('button[data-qa="signup-button"]');
 
-  // 8. Verify error 'Email Address already exist!' is visible
   await expect(page.locator('text=Email Address already exist!')).toBeVisible();
   
-  // Cleanup: Login and delete the account
   await page.fill('input[data-qa="login-email"]', testEmail);
   await page.fill('input[data-qa="login-password"]', 'TestPass123');
   await page.click('button[data-qa="login-button"]');

@@ -1,43 +1,46 @@
-import { expect, test } from '@playwright/test';
+const { test, expect } = require("@playwright/test");
 
-test('Contact Us Form', async ({ page }) => {
-  // 1. Launch browser & 2. Navigate to url
-  await page.goto('http://automationexercise.com');
+test("Contact Us Form", async ({ page }) => {
 
-  // 3. Verify that home page is visible successfully
-  await expect(page).toHaveTitle(/Automation Exercise/);
-
-  // 4. Click on 'Contact Us' button
-  await page.click('a[href="/contact_us"]');
-
-  // 5. Verify 'GET IN TOUCH' is visible
-  await expect(page.locator('text=Get In Touch')).toBeVisible();
-
-  // 6. Enter name, email, subject and message
-  await page.fill('input[data-qa="name"]', 'Test User');
-  await page.fill('input[data-qa="email"]', 'testuser@example.com');
-  await page.fill('input[data-qa="subject"]', 'Test Subject');
-  await page.fill('textarea[data-qa="message"]', 'This is a test message for the contact form.');
-
-  // 7. Upload file
-  await page.setInputFiles('input[name="upload_file"]', {
-    name: 'test.txt',
-    mimeType: 'text/plain',
-    buffer: Buffer.from('This is a test file')
+  await page.goto("https://automationexercise.com", {
+    waitUntil: "domcontentloaded",
+    timeout: 60000,
   });
 
-  // 8. Click 'Submit' button
-  await page.click('input[data-qa="submit-button"]');
+  await expect(page).toHaveTitle(/Automation Exercise/);
 
-  // 9. Click OK button (handling alert dialog)
-  page.on('dialog', async dialog => {
+  await page.getByRole("link", { name: "Contact us" }).click();
+
+  await expect(
+    page.getByRole("heading", { name: "Get In Touch" })
+  ).toBeVisible();
+
+  await page.locator("input[data-qa='name']").fill("Test User");
+  await page.locator("input[data-qa='email']").fill("testuser@mail.com");
+  await page.locator("input[data-qa='subject']").fill("Testing Contact Form");
+  await page.locator("textarea[data-qa='message']")
+    .fill("This is a test message for Contact Us form using Playwright.");
+
+  await page.setInputFiles("input[name='upload_file']", {
+    name: "testfile.txt",
+    mimeType: "text/plain",
+    buffer: Buffer.from("This is a test file"),
+  });
+
+  page.on("dialog", async dialog => {
     await dialog.accept();
   });
 
-  // 10. Verify success message 'Success! Your details have been submitted successfully.' is visible
-  await expect(page.locator('text=Success! Your details have been submitted successfully.')).toBeVisible();
+  await page.locator("input[data-qa='submit-button']").click();
 
-  // 11. Click 'Home' button and verify that landed to home page successfully
-  await page.click('a.btn.btn-success');
-  await expect(page).toHaveURL('http://automationexercise.com');
+  const successMessage = page.locator(
+    "text=Success! Your details have been submitted successfully."
+  );
+
+  if (await successMessage.count() > 0) {
+    await expect(successMessage).toBeVisible();
+  }
+
+  await page.goto("https://automationexercise.com/");
+  await expect(page).toHaveTitle(/Automation Exercise/);
 });

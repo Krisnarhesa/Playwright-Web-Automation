@@ -1,8 +1,10 @@
 import { expect, test } from '@playwright/test';
 
 test('Logout User', async ({ page }) => {
-  // Setup: Create and login to account first
-  await page.goto('http://automationexercise.com');
+  await page.goto('https://automationexercise.com', {
+    waitUntil: 'domcontentloaded',
+    timeout: 60000
+  });
   await page.click('a[href="/login"]');
   
   const timestamp = Date.now();
@@ -10,7 +12,6 @@ test('Logout User', async ({ page }) => {
   const testEmail = `logouttest${timestamp}@example.com`;
   const testPassword = 'TestPass123';
   
-  // Quick registration
   await page.fill('input[data-qa="signup-name"]', testName);
   await page.fill('input[data-qa="signup-email"]', testEmail);
   await page.click('button[data-qa="signup-button"]');
@@ -32,16 +33,10 @@ test('Logout User', async ({ page }) => {
   await page.click('button[data-qa="create-account"]');
   await page.click('a[data-qa="continue-button"]');
 
-  // Test starts here
-  // 1-3. Already navigated and logged in
-  
-  // 8. Verify that 'Logged in as username' is visible
   await expect(page.locator('text=Logged in as')).toBeVisible();
 
-  // 9. Click 'Logout' button
   await page.click('a[href="/logout"]');
 
-  // 10. Verify that user is navigated to login page
   await expect(page).toHaveURL(/.*login/);
   await expect(page.locator('text=Login to your account')).toBeVisible();
 });

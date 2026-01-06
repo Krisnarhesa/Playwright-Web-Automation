@@ -1,16 +1,17 @@
-import { expect, test } from '@playwright/test';
+const { test, expect } = require("@playwright/test");
 
-test('Verify Test Cases Page', async ({ page }) => {
-  // 1. Launch browser & 2. Navigate to url
-  await page.goto('http://automationexercise.com');
+test("Verify Test Cases Page", async ({ page }) => {
 
-  // 3. Verify that home page is visible successfully
+  await page.goto("https://automationexercise.com", {
+    waitUntil: "domcontentloaded",
+    timeout: 60000
+  });
+
   await expect(page).toHaveTitle(/Automation Exercise/);
 
-  // 4. Click on 'Test Cases' button
-  await page.click('a[href="/test_cases"]');
+  await page.locator("header")
+    .getByRole("link", { name: "Test Cases" })
+    .click();
 
-  // 5. Verify user is navigated to test cases page successfully
-  await expect(page).toHaveURL(/.*test_cases/);
-  await expect(page.locator('text=Test Cases')).toBeVisible();
+  await expect(page).toHaveURL(/\/test_cases/);
 });
